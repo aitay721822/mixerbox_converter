@@ -19,7 +19,8 @@ def load_mixerbox_playlist(url: str) -> List[str]:
     return []
 
 def parse_to_youtube_links(video_ids: List[str], per_page: int = 50) -> List[str]:
-    long_link = [f"https://www.youtube.com/watch_videos?video_ids={','.join(video_ids[i * per_page:(i + 1) * per_page])}" for i in range(len(video_ids) // per_page + 1)]
+    length = len(video_ids) // per_page if len(video_ids) % per_page == 0 else len(video_ids) // per_page + 1
+    long_link = [f"https://www.youtube.com/watch_videos?video_ids={','.join(video_ids[i * per_page:(i + 1) * per_page])}" for i in range(length)]
 
     playlist_link = []
     for i in tqdm(long_link):
