@@ -98,8 +98,8 @@ def main():
     logger.info("開始執行腳本")
     logger.info("請勿關閉視窗，直到腳本執行完畢")
     success = driver.execute_async_script(js)
-    logger.info(f"腳本執行完畢，執行結果 {success}，請按下任意鍵離開")
-    os.system('pause')
+    logger.info(f"腳本執行完畢，執行結果 {success}，請輸入任意鍵離開")
+    input("請輸入任意鍵離開...")
 
 if __name__ == '__main__':
     main()
