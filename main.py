@@ -1,3 +1,4 @@
+import signal
 from typing import List
 from tqdm import tqdm
 import undetected_chromedriver as uc
@@ -67,12 +68,14 @@ def main():
     if not os.path.exists(user_data_dir):
         os.makedirs(user_data_dir)
     logger.info(f"Chrome 安裝路徑: {chrome_path}, 使用者資料夾: {user_data_dir}")
-    subprocess.Popen(f'"{chrome_path}" --user-data-dir="{user_data_dir}"', shell=True)
+    proc = subprocess.Popen(f'"{chrome_path}" --user-data-dir="{user_data_dir}"')
 
     logger.info("請手動登入 Google 帳號，並輸入 `yes` 繼續")
     while True:
         if input().strip().lower() == 'yes':
             break
+    if proc.poll() is None:
+        proc.kill()
     
     # 批量新增至 Youtube 播放清單
     driver = uc.Chrome(user_data_dir=user_data_dir)
