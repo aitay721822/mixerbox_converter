@@ -2,6 +2,7 @@ import signal
 from typing import List
 from tqdm import tqdm
 import undetected_chromedriver as uc
+import sys
 import os
 import subprocess
 import json
@@ -40,12 +41,21 @@ def filter_not_available(ids: List[str]) -> List[str]:
             yield id
 
 def detect_chrome_install_path():
-    for i in range(2):
-        path = 'C:\\Program Files' + (' (x86)' if i else '') +'\\Google\\Chrome\\Application'
-        if os.path.isdir(path):
-            for f in os.scandir(path):
-                if f.is_file() and f.name == 'chrome.exe':
-                    return f.path
+    if sys.platform == 'win32':
+        for i in range(2):
+            path = 'C:\\Program Files' + (' (x86)' if i else '') +'\\Google\\Chrome\\Application'
+            if os.path.isdir(path):
+                for f in os.scandir(path):
+                    if f.is_file() and f.name == 'chrome.exe':
+                        return f.path
+    elif sys.platform == 'linux' or sys.platform == 'linux2':
+        path = '/usr/bin/google-chrome'
+        if os.path.isfile(path):
+            return path
+    elif sys.platform == 'darwin':
+        path = "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
+        if os.path.isfile(path):
+            return path
     return None
 
 def main():
