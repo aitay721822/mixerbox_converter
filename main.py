@@ -90,6 +90,12 @@ def main():
     # 批量新增至 Youtube 播放清單
     driver = uc.Chrome(user_data_dir=user_data_dir)
     driver.get('https://www.youtube.com/')
+    
+    logger.info("請到 Youtube 首頁時，輸入 `yes` 繼續")
+    while True:
+        if input().strip().lower() == 'yes':
+            break
+    
     logger.info("載入 Javascript 腳本")
     with open('yt.js', 'r', encoding='utf-8') as f:
         js = f.read()
