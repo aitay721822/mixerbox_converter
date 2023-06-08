@@ -9,6 +9,11 @@ import json
 import logging
 import requests
 import time
+import argparse
+
+# arguments
+parser = argparse.ArgumentParser(description='Mixerbox playlist to Youtube playlist')
+parser.add_argument('--chrome-directory', type=str, default=None, help='Chrome program directory')
 
 # logger
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s][%(name)s][%(levelname)s] %(message)s [%(filename)s:%(lineno)d]')
@@ -39,6 +44,8 @@ def filter_not_available(ids: List[str]) -> List[str]:
         })
         if resp and resp.status_code == 200:
             yield id
+        else:
+            logger.warning(f"影片 {id} 無法取得預覽圖，可能已被下架")
 
 def detect_chrome_install_path():
     if sys.platform == 'win32':
@@ -59,6 +66,8 @@ def detect_chrome_install_path():
     return None
 
 def main():
+    args = parser.parse_args()
+    
     # 解析 Mixerbox 播放清單，並過濾無效影片
     playlist = input("請輸入Mixerbox播放清單網址: ")
     result = load_mixerbox_playlist(playlist)
@@ -69,9 +78,9 @@ def main():
     logger.info(f"共 {len(data)} 筆可用影片")
     
     # 手動登入 Google 帳號
-    chrome_path = detect_chrome_install_path()
+    chrome_path = detect_chrome_install_path() if not args.chrome_directory else args.chrome_directory
     user_data_dir = os.path.join(os.getcwd(), 'userdata')
-    if not chrome_path:
+    if not chrome_path or not os.path.exists(chrome_path):
         logger.error('找不到 Chrome 安裝路徑，離開程式')
         os.exit(1)
     
