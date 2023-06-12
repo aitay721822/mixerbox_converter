@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 # global variables
 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"
+task_filename = 'data.json'
 
 # functions
 def load_mixerbox_playlist(url: str) -> List[str]:
@@ -65,18 +66,53 @@ def detect_chrome_install_path():
             return path
     return None
 
+def load():
+    try:
+        if not os.path.isfile(task_filename):
+            return []
+        with open(task_filename, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        logger.warning(f"讀取上次未完成的任務時發生錯誤，重新開始，錯誤訊息: {e}")
+        return []
+
+def save(data):
+    try:
+        with open(task_filename, 'w', encoding='utf-8') as f: 
+            json.dump(data, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        logger.warning(f"儲存未完成的任務時發生錯誤，錯誤訊息: {e}")
+
+def inp(msg: str, accepted_response: list) -> str:
+    while True:
+        result = input(msg).strip().lower()
+        if result in accepted_response:
+            return result
+
 def main():
     args = parser.parse_args()
     
-    # 解析 Mixerbox 播放清單，並過濾無效影片
-    playlist = input("請輸入Mixerbox播放清單網址: ")
-    result = load_mixerbox_playlist(playlist)
-    data = []
-    for i in filter_not_available(result):
-        data.append(i)
-        time.sleep(0.1)
-    logger.info(f"共 {len(data)} 筆可用影片")
-    
+    # 檢測是否有上次未完成的任務
+    continue_last_task = False
+    data = load()
+    if data:
+        continue_last_task = inp("發現上次的任務，是否繼續? (yes/no): ", ['yes', 'no']) == 'yes'
+
+    if not continue_last_task:
+        # 刪除上次未完成的任務
+        if os.path.isfile(task_filename):
+            os.remove(task_filename)
+            
+        # 解析 Mixerbox 播放清單，並過濾無效影片
+        playlist = input("請輸入Mixerbox播放清單網址: ")
+        result = load_mixerbox_playlist(playlist)
+        data = []
+        for i in filter_not_available(result):
+            data.append(i)
+            time.sleep(0.1)
+        save(data)
+        logger.info(f"共 {len(data)} 筆可用影片")
+
     # 手動登入 Google 帳號
     chrome_path = detect_chrome_install_path() if not args.chrome_directory else args.chrome_directory
     user_data_dir = os.path.join(os.getcwd(), 'userdata')
@@ -90,9 +126,7 @@ def main():
     proc = subprocess.Popen(f'"{chrome_path}" --user-data-dir="{user_data_dir}"')
 
     logger.info("請手動登入 Google 帳號，並輸入 `yes` 繼續")
-    while True:
-        if input().strip().lower() == 'yes':
-            break
+    inp('請輸入 `yes` 繼續: ', ['yes'])
     if proc.poll() is None:
         proc.kill()
     
@@ -101,9 +135,7 @@ def main():
     driver.get('https://www.youtube.com/')
     
     logger.info("請到 Youtube 首頁時，輸入 `yes` 繼續")
-    while True:
-        if input().strip().lower() == 'yes':
-            break
+    inp('請輸入 `yes` 繼續: ', ['yes'])
     
     logger.info("載入 Javascript 腳本")
     with open('yt.js', 'r', encoding='utf-8') as f:
