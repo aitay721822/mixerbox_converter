@@ -20,6 +20,7 @@ parser.add_argument('--save-script', action='store_true', help='save script to f
 app_name = 'mb2yt'
 app_task_name = 'data.json'
 app_script_name = 'script.js'
+app_bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
 log_level = logging.INFO
 log_filename = f'{app_name}.log'
 log_format = '[%(asctime)s][%(name)s][%(levelname)s] %(message)s [%(filename)s:%(lineno)d]'
@@ -44,7 +45,7 @@ def load_mixerbox_playlist(url: str) -> List[str]:
         return [i['f'] for i in items if 't' in i and i['t'].lower() == 'yt']
     return []
 
-def filter_not_available(ids: List[str]) -> Generator[str]:
+def filter_not_available(ids: List[str]) -> Generator[str, None, None]:
     for id in tqdm(ids, desc = "過濾無效影片"):
         resp = requests.get(f'https://i.ytimg.com/vi/{id}/hqdefault.jpg', headers={
             "User-Agent": client_user_agent,
@@ -160,7 +161,7 @@ def main():
     get_validate_response('請輸入 `yes` 繼續: ', check_yes_only)
     
     logger.info("載入 Javascript 腳本")
-    with open('yt.js', 'r', encoding='utf-8') as f:
+    with open(os.path.join(app_bundle_dir, 'yt.js'), 'r', encoding='utf-8') as f:
         js = f.read()
         js += f'\nawait main({json.dumps(data, ensure_ascii=False)})\narguments[arguments.length - 1](true);'
     if args.save_script:
