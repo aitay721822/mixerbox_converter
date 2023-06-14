@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Generator
 from tqdm import tqdm
 import undetected_chromedriver as uc
 import sys
@@ -44,7 +44,7 @@ def load_mixerbox_playlist(url: str) -> List[str]:
         return [i['f'] for i in items if 't' in i and i['t'].lower() == 'yt']
     return []
 
-def filter_not_available(ids: List[str]) -> List[str]:
+def filter_not_available(ids: List[str]) -> Generator[str]:
     for id in tqdm(ids, desc = "過濾無效影片"):
         resp = requests.get(f'https://i.ytimg.com/vi/{id}/hqdefault.jpg', headers={
             "User-Agent": client_user_agent,
@@ -54,7 +54,7 @@ def filter_not_available(ids: List[str]) -> List[str]:
         else:
             logger.warning(f"影片 {id} 無法取得預覽圖，可能已被下架")
 
-def detect_chrome_install_path(chrome_path=None) -> Optional[str]:
+def detect_chrome_install_path(chrome_path: str = None) -> Optional[str]:
     if chrome_path and os.path.isfile(chrome_path):
         return chrome_path
 
@@ -75,7 +75,7 @@ def detect_chrome_install_path(chrome_path=None) -> Optional[str]:
             return path
     return None
 
-def load_task():
+def load_task() -> List[str]:
     try:
         if not os.path.isfile(app_task_name):
             return []
@@ -85,7 +85,7 @@ def load_task():
         logger.warning(f"讀取上次未完成的任務時發生錯誤，重新開始，錯誤訊息: {e}")
         return []
 
-def save_task(data: List[str]):
+def save_task(data: List[str]) -> None:
     try:
         with open(app_task_name, 'w', encoding='utf-8') as f: 
             json.dump(data, f, ensure_ascii=False, indent=4)
