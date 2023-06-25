@@ -146,7 +146,7 @@ def main():
     if not os.path.exists(user_data_dir):
         os.makedirs(user_data_dir)
     logger.info(f"Chrome 安裝路徑: {chrome_path}, 使用者資料夾: {user_data_dir}")
-    proc = subprocess.Popen(f'"{chrome_path}" --user-data-dir="{user_data_dir}" "https://accounts.google.com/ServiceLogin?hl=zh-TW"')
+    proc = subprocess.Popen([chrome_path, f'--user-data-dir={user_data_dir}', "https://accounts.google.com/ServiceLogin?hl=zh-TW"])
 
     logger.info("請手動登入 Google 帳號，並輸入 `yes` 繼續")
     get_validate_response('請輸入 `yes` 繼續: ', check_yes_only)
