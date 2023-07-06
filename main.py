@@ -17,14 +17,15 @@ parser.add_argument('--debug', action='store_true', help='enable debug mode')
 parser.add_argument('--save-script', action='store_true', help='save script to file')
 
 # global variables
+cwd = os.getcwd()
 app_name = 'mb2yt'
-app_task_name = 'data.json'
-app_script_name = 'script.js'
+app_task_name = os.path.join(cwd, 'data.json')
+app_script_name = os.path.join(cwd, 'script.js')
 app_bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
 log_level = logging.INFO
-log_filename = f'{app_name}.log'
+log_filepath = os.path.join(cwd, f'{app_name}.log')
 log_format = '[%(asctime)s][%(name)s][%(levelname)s] %(message)s [%(filename)s:%(lineno)d]'
-client_userdata_path = os.path.join(os.getcwd(), 'userdata')
+client_userdata_path = os.path.join(cwd, 'userdata')
 client_user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"
 
 # logger
@@ -105,7 +106,7 @@ def configure_logger(debug: bool):
     logging.basicConfig(level=log_level if not debug else logging.DEBUG, 
                        format=log_format,
                        handlers=[
-                            logging.FileHandler(log_filename, encoding='utf-8'),
+                            logging.FileHandler(log_filepath, encoding='utf-8'),
                             logging.StreamHandler()
                        ])
 
