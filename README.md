@@ -4,7 +4,7 @@
 
 ## Requirement
 
-- Python 3.6 up (Tested in Python 3.9.16)
+- Python 3.6.x ~ 3.11.x (Tested in Python 3.9.16)
 - tqdm
 - requests
 - undetected-chromedriver
